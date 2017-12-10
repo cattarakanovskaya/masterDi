@@ -1,24 +1,40 @@
 package com.example.kate.myapplication;
 
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.net.wifi.ScanResult;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
     private Button listen;
     private  boolean isPower;
+    private WifiManager wifiMgr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         writeFileSD();
+
+
+        wifiMgr = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+
+
+
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -31,9 +47,12 @@ public class MainActivity extends AppCompatActivity {
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Log.d(LOG_TAG, "Click!");
             if(isPower == false){
                 listen.setText("Stop");
                 isPower = true;
+                GetAnWriteWifiInfo runnable = new GetAnWriteWifiInfo(wifiMgr);
+                new Thread(runnable).start();
             }
             else{
                 listen.setText("Start");

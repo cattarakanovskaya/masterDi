@@ -22,25 +22,17 @@ public class MainActivity extends AppCompatActivity {
     private Button listen;
     private  boolean isPower;
     private WifiManager wifiMgr;
+    final String LOG_TAG = "myLogs";
+    private GetAnWriteWifiInfo runnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        writeFileSD();
-
-
         wifiMgr = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-
-
-
-
-
-
+        runnable = new GetAnWriteWifiInfo(wifiMgr);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         listen = (Button) findViewById(R.id.button);
         isPower = false;
-
         listen.setOnClickListener(onClickListener);
     }
 
@@ -51,53 +43,13 @@ public class MainActivity extends AppCompatActivity {
             if(isPower == false){
                 listen.setText("Stop");
                 isPower = true;
-                GetAnWriteWifiInfo runnable = new GetAnWriteWifiInfo(wifiMgr);
                 new Thread(runnable).start();
             }
             else{
+                runnable.StopActive();
                 listen.setText("Start");
                 isPower = false;
             }
-
         }
     };
-
-    final String LOG_TAG = "myLogs";
-    final String DIR_SD = "MyFiles2";
-    final String FILENAME_SD = "fileSD.txt";
-
-    private void writeFileSD() {
-        // проверяем доступность SD
-        Log.d(LOG_TAG, "Start!!");
-        if (!Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {
-            Log.d(LOG_TAG, "SD-карта не доступна: " + Environment.getExternalStorageState());
-            return;
-        }
-        // получаем путь к SD
-        File sdPath = Environment.getExternalStorageDirectory();
-        Log.d(LOG_TAG, String.valueOf(sdPath));
-        // добавляем свой каталог к пути
-        sdPath = new File(sdPath.getAbsolutePath() + "/" + DIR_SD);
-        Log.d(LOG_TAG, String.valueOf(sdPath));
-        // создаем каталог
-        if (sdPath.mkdirs() == true ) Log.d(LOG_TAG, "It's ok");
-        else Log.d(LOG_TAG, "It's not ok");
-        // формируем объект File, который содержит путь к файлу
-        File sdFile = new File(sdPath, FILENAME_SD);
-        try {
-            // открываем поток для записи
-            Log.d(LOG_TAG, "Block try1");
-            BufferedWriter bw = new BufferedWriter(new FileWriter(sdFile));
-            Log.d(LOG_TAG, "Block try2");
-            // пишем данные
-            bw.write("Содержимое файла на SD");
-            // закрываем поток
-            bw.close();
-            Log.d(LOG_TAG, "Файл записан на SD: " + sdFile.getAbsolutePath());
-        } catch (IOException e) {
-            Log.d(LOG_TAG, "Block exception");
-            e.printStackTrace();
-        }
-    }
 }
